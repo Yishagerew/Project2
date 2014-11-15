@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -15,8 +16,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
 			@NamedQuery(name="MeasureDefinition.findAll", query="SELECT m FROM MeasureDefinition m"),
 			@NamedQuery(name="MeasureDefinition.findByMeasureDefId",query="SELECT m FROM MeasureDefinition m WHERE m.measureDefId=:measureDefId"),
-			@NamedQuery(name="MeasureDefinition.getMeasureId",query="SELECT m FROM MeasureDefinition m WHERE m.measureDefName=:measureDefId")
+			@NamedQuery(name="MeasureDefinition.getMeasureId",query="SELECT m FROM MeasureDefinition m WHERE m.measureDefName=:measureDefName")
 })
+@NamedNativeQuery(name="MeasureDefinition.findAllMeasureNames",query="SELECT m.measureDefId,m.measureDefName FROM measureDefinition m",resultClass=MeasureDefinition.class)
 @XmlRootElement
 public class MeasureDefinition implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -30,7 +32,7 @@ public class MeasureDefinition implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.TABLE,generator="sqlite_measureDef")
 	@Column(name="\"measureDefId\"")
-	private int measureDefId;
+	@XmlTransient private int measureDefId;
 
 	@Column(name="\"measureDefName\"")
 	private String measureDefName;

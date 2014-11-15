@@ -117,4 +117,16 @@
 			<classes dir="${build.dir}"/>
 		</war>
 	</target>
+	<!--The following target is used to be called for starting the server -->
+	<target name="start_server">
+				<echo message="Server is starting..." />
+				<java classname="eHealth.rest.servers.ApplicationServer" classpath="${build.dir}">
+					<classpath>
+						<fileset dir="${lib.dir}">
+							<include name="**/*.jar" />
+							<include name="*.jar" />
+						</fileset>
+					</classpath>
+				</java>
+			</target>
 </project>

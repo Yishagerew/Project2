@@ -23,6 +23,7 @@
 				this is not reccommended, but we will use it as example only -->
 			<property name="eclipselink.ddl-generation.output-mode"
 				value="database" />
+			<property name="eclipselink.jpa.uppercase-column-names" value="true"/>
 
 			<!-- <property name="eclipselink.ddl-generation" value="create-tables" 
 				/> -->

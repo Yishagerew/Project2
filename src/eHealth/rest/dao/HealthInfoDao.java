@@ -1,5 +1,5 @@
 /**
- * @author jc
+ * @author Yishagerew.L
  * @DateModified Nov 6, 20147:26:02 PM
  */
 package eHealth.rest.dao;
@@ -8,10 +8,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-/**
- * @author jc
- * @DateModified Nov 6, 20147:26:02 PM
- */
+                                   /*********************
+                                    * ****EXTRA #1 ******
+                                    * *******************/
+                                    
 public enum HealthInfoDao {
 	 instance;
 	 private static EntityManagerFactory emf;
@@ -19,6 +19,7 @@ public enum HealthInfoDao {
 	  * Demonstrates the use of ThreadLocal design pattern 
 	  * EntityManager is not threadsafe
 	  * We can implement ThreadLocal pattern for avoiding thread safety issues.
+	  * An entity manager will be checked if its alive
 	  */
 	 public static final ThreadLocal<EntityManager>threadlocal=new ThreadLocal<EntityManager>();
 	 public static EntityManagerFactory getEntityManagerfactory()
@@ -40,4 +41,5 @@ public enum HealthInfoDao {
 	 }
 	 return em;
 }
+	
 }

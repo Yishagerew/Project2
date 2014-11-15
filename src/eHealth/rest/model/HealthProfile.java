@@ -12,7 +12,13 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @Table(name = "HealthProfile")
-@NamedQuery(name = "HealthProfile.findAll", query = "SELECT h FROM HealthProfile h")
+@NamedQueries ({@NamedQuery(name = "HealthProfile.findAll", query = "SELECT h FROM HealthProfile h"),
+	            @NamedQuery(name= "HealthProfile.findByMesDef",query="SELECT h FROM HealthProfile h WHERE h.measuredefinition=:measureDefinition"),
+	            @NamedQuery(name="HealthProfileByMinMaxValue",query="SELECT h FROM HealthProfile h WHERE h.measuredefinition=:measureDefinition and h.measuredValue BETWEEN :min and :max "),
+	            @NamedQuery(name="HealthProfileByMinValue",query="SELECT h FROM HealthProfile h WHERE h.measuredefinition=:measureDefinition and h.measuredValue >= :min"),
+                @NamedQuery(name="HealthProfileByMaxValue",query="SELECT h FROM HealthProfile h WHERE h.measuredefinition=:measureDefinition and h.measuredValue <= :max")
+})
+
 @XmlRootElement
 public class HealthProfile implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -24,14 +30,22 @@ public class HealthProfile implements Serializable {
 	private int measureId;
 	@Column(name = "\"dateCreated\"")
 	private String dateCreated;
-	/**
-	 * @Column(name="\"measureDefId\"") private int measureDefId;
-	 */
-
 	@Column(name = "\"measuredValue\"")
 	private double measuredValue;
 	@Column(name = "\"updateDate\"")
 	private String updateDate;
+
+	/**
+	 * Used to set values from POST methods for adding new person
+	 * @param measuredValue
+	 * @param measuredefinition
+	 */
+	public HealthProfile(double measuredValue,
+			MeasureDefinition measuredefinition) {
+		super();
+		this.measuredValue = measuredValue;
+		this.measuredefinition = measuredefinition;
+	}
 
 	// bi-directional one-to-one association to MeasureDefinition
 	@OneToOne
@@ -97,6 +111,10 @@ public class HealthProfile implements Serializable {
 
 	public void setPerson(Person person) {
 		this.person = person;
+	}
+	public static void addHealthProfile()
+	{
+		
 	}
 
 }

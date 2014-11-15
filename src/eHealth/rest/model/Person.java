@@ -5,8 +5,12 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import eHealth.rest.dao.HealthInfoDao;
 
 import java.util.List;
+
 //import java.text.SimpleDateFormat;
 
 /**
@@ -14,29 +18,35 @@ import java.util.List;
  * 
  */
 /**
- * 	SimpleDateFormat formatter = new SimpleDateFormat("EEEE, MMM dd, yyyy HH:mm:ss a");
-	String dateInString = "Friday, Jun 7, 2013 12:10:56 PM";		
- 
-	try {
- 
-		Date date = formatter.parse(dateInString);
-		System.out.println(date);
-		System.out.println(formatter.format(date));
- 
-	} catch (ParseException e) {
-		e.printStackTrace();
-	}
- * @author jc
+ * SimpleDateFormat formatter = new
+ * SimpleDateFormat("EEEE, MMM dd, yyyy HH:mm:ss a"); String dateInString =
+ * "Friday, Jun 7, 2013 12:10:56 PM";
+ * 
+ * try {
+ * 
+ * Date date = formatter.parse(dateInString); System.out.println(date);
+ * System.out.println(formatter.format(date));
+ * 
+ * } catch (ParseException e) { e.printStackTrace(); }
+ * 
+ * @author jchttp://in.freeluna.it/
  * @DateModified Nov 7, 201412:26:17 AM
  */
-@Entity
-@Table(name="PERSON")
-@NamedQueries({@NamedQuery(name = "Person.findAll", query = "SELECT p FROM Person p"),
-			   @NamedQuery(name="Person.findByPersonId",query="SELECT p FROM Person p WHERE p.personId=:personId")
-
+@Entity(name = "Person")
+@Table(name = "PERSON")
+@NamedQueries({
+		@NamedQuery(name = "Person.findAll", query = "SELECT p FROM Person p"),
+		@NamedQuery(name = "Person.findByPersonId", query = "SELECT p FROM Person p WHERE p.personId=:personId"),
+		@NamedQuery(name = "Person.findMainInfo", query = "SELECT p.personId,p.firstName,p.middleName,p.lastName FROM Person p WHERE p.personId=:personId ")
 })
-
-@XmlRootElement
+@NamedNativeQuery(name = "Person.findAllMainInfo", query = "SELECT p.personId,p.firstName,p.middleName,p.lastName,p.email,p.userName,p.password FROM Person p", resultClass = Person.class)
+@SqlResultSetMapping(name = "EmployeeMainMapping", entities = { @EntityResult(entityClass = Person.class, fields = {
+		@FieldResult(name = "personId", column = "PersonId"),
+		@FieldResult(name = "firstName", column = "firstName"),
+		@FieldResult(name = "middleName", column = "middleName"),
+		@FieldResult(name = "lastName", column = "lastName") }) })
+@XmlRootElement(name="Person")
+//@XmlType(propOrder={"personId","firstName","middleName","lastName"})
 public class Person implements Serializable {
 	private static final long serialVersionUID = 100L;
 	@Id
@@ -58,16 +68,69 @@ public class Person implements Serializable {
 	private String createdDate;
 	@Column(name = "updatedDate")
 	private String updatedDate;
+	
+	/**
+	 * Used to initialize if personal details are only given
+	 * @param personId
+	 * @param firstName
+	 * @param middleName
+	 * @param lastName
+	 * @param email
+	 * @param userName
+	 * @param password
+	 */
+	public Person(int personId, String firstName, String middleName,
+			String lastName, String email, String userName, String password) {
+		super();
+		this.personId = personId;
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.email = email;
+		this.userName = userName;
+		this.password = password;
+	}
+	
+/**
+ * Used to initialize the constructor if healthprofile is also needs to be assi
+ * @param personId
+ * @param firstName
+ * @param middleName
+ * @param lastName
+ * @param email
+ * @param userName
+ * @param password
+ * @param healthprofiles
+ */
+	public Person(int personId, String firstName, String middleName,
+			String lastName, String email, String userName, String password,
+			List<HealthProfile> healthprofiles) {
+		super();
+		this.personId = personId;
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.email = email;
+		this.userName = userName;
+		this.password = password;
+		this.healthprofiles = healthprofiles;
+	}
+
+
+	public Person() {
+}
+
+
 	// bi-directional many-to-one association to HealthProfile
-	@OneToMany(mappedBy = "person",cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<HealthProfile> healthprofiles;
 
 	// bi-directional many-to-one association to MeasureHistory
-	@OneToMany(mappedBy = "person", cascade=CascadeType.ALL,fetch = FetchType.EAGER)
-	private List<MeasureHistory> measurehistories;
+	@OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@XmlTransient private List<MeasureHistory> measurehistories;
 
 	public String getCreatedDate() {
-		
+
 		return this.createdDate;
 	}
 
@@ -139,7 +202,7 @@ public class Person implements Serializable {
 		this.userName = userName;
 	}
 
-	@XmlElementWrapper(name="HealthProfile")
+	@XmlElementWrapper(name = "HealthProfile")
 	public List<HealthProfile> getHealthprofiles() {
 		return this.healthprofiles;
 	}
@@ -162,7 +225,8 @@ public class Person implements Serializable {
 		return healthprofile;
 	}
 
-	@XmlElementWrapper(name="MeasuredHistories")
+	
+	@XmlElementWrapper(name = "MeasuredHistories")
 	public List<MeasureHistory> getMeasurehistories() {
 		return this.measurehistories;
 	}
@@ -183,6 +247,61 @@ public class Person implements Serializable {
 		measurehistory.setPerson(null);
 
 		return measurehistory;
+	}
+
+	public static Person updatePerson(Person person) {
+	EntityManager	em = HealthInfoDao.instance.getEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		person = em.merge(person);
+		tx.commit();
+		return person;
+	}
+
+	/**
+	 * 
+	 * @param person
+	 *            A person object
+	 * @return
+	 */
+	public static boolean DeletePerson(Person person) {
+		boolean isdeleted = false;
+		EntityManager em = HealthInfoDao.instance.getEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		try {
+			em.remove(person);
+			isdeleted = true;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		tx.commit();
+
+		return isdeleted;
+
+	}
+
+	/**
+	 * 
+	 * @param person
+	 *            A person object
+	 * @return
+	 */
+	public static boolean addNewPerson(Person person) {
+		boolean isAdded = false;
+		EntityManager em = HealthInfoDao.instance.getEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		try {
+			em.persist(person);
+			isAdded = true;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		tx.commit();
+
+		return isAdded;
+
 	}
 
 }

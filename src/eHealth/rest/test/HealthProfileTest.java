@@ -45,9 +45,9 @@ public class HealthProfileTest {
 	public void addHealthProfileHistory()
 	{
 		EntityManager em=HealthInfoDao.instance.getEntityManager();
-		Query query=em.createNamedQuery("Person.findByPersonId",Person.class).setParameter("personId", 12);
+		Query query=em.createNamedQuery("Person.findByPersonId",Person.class).setParameter("personId", 1222);
 		Person person=(Person) query.getSingleResult();
-		assertEquals(" The id is not retrieced",12,person.getPersonId());
+		assertEquals(" The id is not retrieced",1222,person.getPersonId());
 		Query query2=em.createNamedQuery("MeasureDefinition.findByMeasureDefId",MeasureDefinition.class).setParameter("measureDefId", 12);
 		MeasureDefinition mDef=new MeasureDefinition();
 		mDef=(MeasureDefinition) query2.getSingleResult();
